@@ -1,8 +1,9 @@
 import java.io.PrintWriter;
 
 /*
- * Class methods adapted from CPSC 319 lecture notes
- * A binary search tree class
+ * Class methods adapted from CPSC 319 lecture notes unless otherwise noted
+ * An AVL binary search tree class
+ * http://www.sanfoundry.com/java-program-implement-avl-tree/
  */
 public class BST {
 	private Node root;
@@ -13,22 +14,88 @@ public class BST {
 	public Node getroot(){
 		return root;
 	}
-	public void insert(char opcd, int snum, String lnam, String dep, String prog, int yr) {
-		Node current = root, parent = null;
-		while(current != null) {
-			parent = current;
-			if(lnam.compareTo(current.getLastname()) > 0)
-				current = current.getRight();
-			else
-				current = current.getLeft();
-		}
-		if(root == null)
-			root = new Node(opcd, snum, lnam, dep, prog, yr, null, null, parent);
-		else if(lnam.compareTo(parent.getLastname())>0)
-			parent.setRight(new Node(opcd, snum, lnam, dep, prog, yr, null, null, parent));
-		else
-			parent.setLeft(new Node(opcd, snum, lnam, dep, prog, yr, null, null, parent));
+	/*
+	 * Method to return the height of a node
+	 */
+	private int height(Node t) {
+		return t == null ? -1 : t.getHeight();
 	}
+	/*
+	 * Method to return max of left/right of node 
+	 */
+    private int max(int lhs, int rhs)
+    {
+        return lhs > rhs ? lhs : rhs;
+    }
+    public void insert(char opcd, int snum, String lnam, String dep, String prog, int yr) {
+    	root = insert(opcd, snum, lnam, dep, prog, yr, root);
+    }
+	public Node insert(char opcd, int snum, String lnam, String dep, String prog, int yr, Node t) {
+        if (t == null)
+            t = new Node(opcd, snum, lnam, dep, prog, yr, null, null);
+        else if (lnam.compareTo(t.getLastname()) < 0)
+        {
+            t.setLeft(insert(opcd, snum, lnam, dep, prog, yr, t.getLeft()));
+            if( height( t.getLeft() ) - height( t.getRight() ) == 2 ) {	//Check if tree is out of balance, if yes adjust accordingly
+            	if( lnam.compareTo(t.getLeft().getLastname()) < 0 )		//Check if a left or right rotation is needed
+                    t = rotateWithLeftChild( t );
+                else
+                    t = doubleWithLeftChild( t );
+            } 
+        }
+        else if( lnam.compareTo(t.getLastname()) > 0)
+        {
+            t.setRight(insert(opcd, snum, lnam, dep, prog, yr, t.getRight()));
+            if( height( t.getRight() ) - height( t.getLeft() ) == 2 ) {	//Check if tree is out of balance, if yes adjust accordingly
+            	if( lnam.compareTo(t.getRight().getLastname()) > 0) 	//Check if a left or right rotation is needed
+                    t = rotateWithRightChild( t );
+                else
+                    t = doubleWithRightChild( t );
+            }
+        }
+        else
+          ;  // Duplicate; do nothing
+        t.setHeight(max( height( t.getLeft() ), height( t.getRight() ) ) + 1);
+        return t;		
+	}
+    /* Rotate binary tree node with left child */     
+    private Node rotateWithLeftChild(Node k2)
+    {
+    	Node k1 = k2.getLeft();
+        k2.setLeft(k1.getRight());
+        k1.setRight(k2);
+        k2.setHeight(max( height( k2.getLeft() ), height( k2.getRight() ) ) + 1);
+        k1.setHeight(max( height( k1.getLeft() ), k2.getHeight() ) + 1);
+        return k1;
+    }
+    /* Rotate binary tree node with right child */
+    private Node rotateWithRightChild(Node k1)
+    {
+    	Node k2 = k1.getRight();
+        k1.setRight(k2.getLeft());
+        k2.setLeft(k1);
+        k1.setHeight(max( height( k1.getLeft() ), height( k1.getRight() ) ) + 1);
+        k2.setHeight(max( height( k2.getRight() ), k1.getHeight() ) + 1);
+        return k2;
+    }
+    /*
+     * Double rotate binary tree node: first left child
+     * with its right child; then node k3 with new left child 
+     */
+    private Node doubleWithLeftChild(Node k3)
+    {
+        k3.setLeft(rotateWithRightChild( k3.getLeft() ));
+        return rotateWithLeftChild( k3 );
+    }
+    /*
+     * Double rotate binary tree node: first right child
+     * with its left child; then node k1 with new right child 
+     */      
+    private Node doubleWithRightChild(Node k1)
+    {
+        k1.setRight(rotateWithLeftChild( k1.getRight() ));
+        return rotateWithRightChild( k1 );
+    }    
 	public void depthfirst(Node current, PrintWriter pw) {
 		if(current != null) {
 			depthfirst(current.getLeft(), pw);

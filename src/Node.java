@@ -11,15 +11,16 @@ public class Node {
 	private String department;
 	private String program;
 	private int year;
-	private Node left, right, parent;
+	private Node left, right;
+	private int height;
 	
 	public Node() {
-		setParent(setLeft(setRight(null)));
+		setLeft(setRight(null));
 	}
 	public Node(char opcd, int snum, String lnam, String dep, String prog, int yr) {
-		this(opcd, snum, lnam, dep, prog, yr, null, null, null);
+		this(opcd, snum, lnam, dep, prog, yr, null, null);
 	}
-	public Node(char opcd, int snum, String lnam, String dep, String prog, int yr, Node lt, Node rt, Node p) {
+	public Node(char opcd, int snum, String lnam, String dep, String prog, int yr, Node lt, Node rt) {
 		setOpcode(opcd);
 		setStudentnum(snum);
 		setLastname(lnam);
@@ -27,7 +28,7 @@ public class Node {
 		setProgram(prog);
 		setLeft(lt);
 		setRight(rt);
-		setParent(p);
+		setHeight(0);
 	}
 	public char getOpcode() {
 		return opcode;
@@ -79,13 +80,13 @@ public class Node {
 		this.right = right;
 		return right;
 	}
-	public Node getParent() {
-		return parent;
-	}
-	public void setParent(Node parent) {
-		this.parent = parent;
-	}
 	public void visit(PrintWriter pw) {
 		pw.println(getLastname().trim() + " ");
+	}
+	public int getHeight() {
+		return height;
+	}
+	public void setHeight(int height) {
+		this.height = height;
 	}
 }
