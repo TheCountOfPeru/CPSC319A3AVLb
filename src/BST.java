@@ -1,8 +1,7 @@
 import java.io.PrintWriter;
 
 /*
- * Class methods adapted from CPSC 319 lecture notes unless otherwise noted
- * An AVL binary search tree class
+ * Class methods from CPSC 319 lecture notes and AVL methods taken from
  * http://www.sanfoundry.com/java-program-implement-avl-tree/
  */
 public class BST {
@@ -27,30 +26,37 @@ public class BST {
     {
         return lhs > rhs ? lhs : rhs;
     }
+    /*
+     * Insertion method called only in the main method
+     */
     public void insert(char opcd, int snum, String lnam, String dep, String prog, int yr) {
     	root = insert(opcd, snum, lnam, dep, prog, yr, root);
     }
+    /*
+     * Insertion method with Node parameter. Only called in the above insertion method. 
+     * AVL algorithm implemented here as well.
+     */
 	public Node insert(char opcd, int snum, String lnam, String dep, String prog, int yr, Node t) {
-        if (t == null)
+        if (t == null)													//If the root is null set the new node as the root.
             t = new Node(opcd, snum, lnam, dep, prog, yr, null, null);
-        else if (lnam.compareTo(t.getLastname()) < 0)
+        else if (lnam.compareTo(t.getLastname()) < 0)					//If the new node is less than the current node t (LEFT SIDE)
         {
-            t.setLeft(insert(opcd, snum, lnam, dep, prog, yr, t.getLeft()));
+            t.setLeft(insert(opcd, snum, lnam, dep, prog, yr, t.getLeft()));//Recursively find where to insert the new node
             if( height( t.getLeft() ) - height( t.getRight() ) == 2 ) {	//Check if tree is out of balance, if yes adjust accordingly
-            	if( lnam.compareTo(t.getLeft().getLastname()) < 0 )		//Check if a left or right rotation is needed
-                    t = rotateWithLeftChild( t );
-                else
-                    t = doubleWithLeftChild( t );
+            	if( lnam.compareTo(t.getLeft().getLastname()) < 0 )		//If the new node is on the outside subtree of the pivot
+                    t = rotateWithLeftChild( t );						//then execute a RIGHT ROTATION
+                else													//If the new node is on the inside subtree of the pivot
+                    t = doubleWithLeftChild( t );						//then execute a LEFT RIGHT ROTATION
             } 
         }
-        else if( lnam.compareTo(t.getLastname()) > 0)
+        else if( lnam.compareTo(t.getLastname()) > 0)				//If the new node is greater than the current node t (RIGHT SIDE)
         {
-            t.setRight(insert(opcd, snum, lnam, dep, prog, yr, t.getRight()));
+            t.setRight(insert(opcd, snum, lnam, dep, prog, yr, t.getRight()));//Recursively find where to insert the new node
             if( height( t.getRight() ) - height( t.getLeft() ) == 2 ) {	//Check if tree is out of balance, if yes adjust accordingly
-            	if( lnam.compareTo(t.getRight().getLastname()) > 0) 	//Check if a left or right rotation is needed
-                    t = rotateWithRightChild( t );
-                else
-                    t = doubleWithRightChild( t );
+            	if( lnam.compareTo(t.getRight().getLastname()) > 0) 	//If the new node is on the outside subtree of the pivot
+                    t = rotateWithRightChild( t );						//then execute a LEFT ROTATION
+                else													//If the new node is on the inside subtree of the pivot
+                    t = doubleWithRightChild( t );						//Execute a RIGHT LEFT ROTATION
             }
         }
         else
@@ -58,44 +64,50 @@ public class BST {
         t.setHeight(max( height( t.getLeft() ), height( t.getRight() ) ) + 1);
         return t;		
 	}
-    /* Rotate binary tree node with left child */     
+    /*
+     *  Rotate binary tree node with left child, otherwise known as a RIGHT ROTATION
+     */     
     private Node rotateWithLeftChild(Node k2)
     {
-    	Node k1 = k2.getLeft();
-        k2.setLeft(k1.getRight());
-        k1.setRight(k2);
-        k2.setHeight(max( height( k2.getLeft() ), height( k2.getRight() ) ) + 1);
+    	Node k1 = k2.getLeft();			//k2 is the pivot node so k1 will be the
+        k2.setLeft(k1.getRight());		//Son node. Then set the pivot's left child to the right child of the son
+        k1.setRight(k2);				//Then set son nodes right child to the pivot
+        k2.setHeight(max( height( k2.getLeft() ), height( k2.getRight() ) ) + 1);//adjust the height values of the rotated nodes.
         k1.setHeight(max( height( k1.getLeft() ), k2.getHeight() ) + 1);
         return k1;
     }
-    /* Rotate binary tree node with right child */
+    /*
+     *  Rotate binary tree node with right child, otherwise known as a LEFT ROTATION
+     */
     private Node rotateWithRightChild(Node k1)
     {
-    	Node k2 = k1.getRight();
-        k1.setRight(k2.getLeft());
-        k2.setLeft(k1);
-        k1.setHeight(max( height( k1.getLeft() ), height( k1.getRight() ) ) + 1);
+    	Node k2 = k1.getRight();		//k2 is the pivot node so k1 will be the
+        k1.setRight(k2.getLeft());		//Son node. Then set the pivot's right child to the left child of the son
+        k2.setLeft(k1);					//Then set son nodes left child to the pivot
+        k1.setHeight(max( height( k1.getLeft() ), height( k1.getRight() ) ) + 1);//adjust the height values of the rotated nodes.
         k2.setHeight(max( height( k2.getRight() ), k1.getHeight() ) + 1);
         return k2;
     }
     /*
      * Double rotate binary tree node: first left child
      * with its right child; then node k3 with new left child 
+     * Otherwise known as a LEFT RIGHT ROTATION
      */
-    private Node doubleWithLeftChild(Node k3)
+    private Node doubleWithLeftChild(Node k3)//k3 is the pivot node
     {
-        k3.setLeft(rotateWithRightChild( k3.getLeft() ));
-        return rotateWithLeftChild( k3 );
+        k3.setLeft(rotateWithRightChild( k3.getLeft() ));	//Do a LEFT ROTATION of the son 
+        return rotateWithLeftChild( k3 );					//Do a RIGHT ROTATION at the pivot
     }
     /*
      * Double rotate binary tree node: first right child
      * with its left child; then node k1 with new right child 
+     * Otherwise known as a RIGHT LEFT ROTATION
      */      
-    private Node doubleWithRightChild(Node k1)
+    private Node doubleWithRightChild(Node k1)//k1 is pivot node 
     {
-        k1.setRight(rotateWithLeftChild( k1.getRight() ));
-        return rotateWithRightChild( k1 );
-    }    
+        k1.setRight(rotateWithLeftChild( k1.getRight() ));	//Do a RIGHT ROTATION of the son 
+        return rotateWithRightChild( k1 );					//Do a LEFT ROTATION at the pivot
+    } 
 	public void depthfirst(Node current, PrintWriter pw) {
 		if(current != null) {
 			depthfirst(current.getLeft(), pw);

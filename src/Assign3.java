@@ -32,7 +32,7 @@ public class Assign3 {
 			System.exit(-1);
 		}
 		*/
-		fileIn = new File("a3input2.txt");//args[0]);
+		fileIn = new File("a3input1.txt");//args[0]);
 		BST mybst = new BST();
 		Node current; 
 		String temp = "";
@@ -66,6 +66,7 @@ public class Assign3 {
 		
 		try {
 			pw = new PrintWriter("output1.txt");
+			pw.println("Depth first traversal:");
 			mybst.depthfirst(current, pw);
 			System.out.println("Depth first traversal success.");
 			pw.close();
@@ -74,6 +75,7 @@ public class Assign3 {
 		}
 		try {
 			pw = new PrintWriter("output2.txt");
+			pw.println("Breadth first traversal:");
 			mybst.breadthfirst(pw);
 			System.out.println("Breadth first traversal success.");
 			pw.close();
